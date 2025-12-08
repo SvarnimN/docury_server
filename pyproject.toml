@@ -1,0 +1,20 @@
+[project]
+name = "rag-assignment"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "faiss-cpu>=1.13.1",
+    "fastapi[standard]>=0.124.0",
+    "fastembed>=0.7.4",
+    "langchain>=1.1.2",
+    "langchain-classic>=1.0.0",
+    "langchain-community>=0.4.1",
+    "langchain-google-genai>=3.2.0",
+    "langchain-redis>=0.2.5",
+    "pypdf>=6.4.0",
+    "python-dotenv>=1.2.1",
+    "python-multipart>=0.0.20",
+    "redis>=6.4.0",
+]
