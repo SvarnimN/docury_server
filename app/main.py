@@ -17,4 +17,4 @@ app.add_middleware(
 
 @app.get("/")
 def index():
-    return "Welcome to you Docury."
+    return "Welcome to Docury."
