@@ -23,8 +23,8 @@ class LLMResponse(BaseModel):
 
 class RAGService:
     def __init__(self):
-        self.llm = ChatCohere(temperature=0)
-        # self.llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0)
+        # self.llm = ChatCohere(temperature=0)
+        self.llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0)
         self.vector_retriever = VectorService().get_retriever()
         self.wiki_retriever = WikipediaRetriever(top_k_results=2, doc_content_chars_max=3000)
         self.prompt_template = get_prompt_templates()
@@ -59,7 +59,8 @@ class RAGService:
 
     def get_final_chain(self, retriever_type: str):
         retrieval_chain = {
-            "context": RunnableLambda(lambda x: self.retriever(x, retriever_type)) | format_docs,
+            "context": RunnableLambda(lambda x: self.retriever(x, retriever_type))
+            | RunnableLambda(lambda x: format_docs(x, retriever_type)),
             "question": RunnableLambda(lambda x: x["question"]),
             "chat_history": RunnableLambda(lambda x: x["chat_history"]),
         }
