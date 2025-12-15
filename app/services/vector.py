@@ -41,7 +41,7 @@ class VectorService:
 
         self.vector_store.save_local(self.index_path)
 
-    def get_retriever(self, k: int = 3):
+    def get_retriever(self, k: int = 5):
         if self.vector_store is None:
             self.load_index()
 
