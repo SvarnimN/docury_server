@@ -10,6 +10,7 @@ def get_prompt_templates() -> Dict[str, str]:
     in the document context below.
 
     Rules:
+    - Provide greetings for user greetings.
     - Do NOT use prior knowledge or general knowledge.
     - Every factual statement MUST include a citation.
     - Use the citation format exactly as shown:
@@ -20,10 +21,15 @@ def get_prompt_templates() -> Dict[str, str]:
     "The provided question is irrelevant to the given documents."
     - Convert any Markdown or HTML into plain text in your response.
 
+    Set is_answer_found to True if the relevant answer is found in
+    the provided documents. Otherwise, set is_answer_found to False.
+    Similary, set answer to the correct answer string. Otherwise, set
+    answer to 'No relevant answer found in the provided document'.
+
     Document Context:
     {context}
     """
-
+    
     QUESTION = """
     Given the following conversation and a follow-up question,
     rewrite the follow-up question so that it can be understood
