@@ -1,57 +1,68 @@
 from langchain_core.documents import Document
 from typing import List, Dict
 
+
 def get_prompt_templates() -> Dict[str, str]:
     SYSTEM = """
-        You are a helpful AI assistant that answers user questions using your
-        general knowledge and, where relevant, content from provided documents. 
-        When you use the documents, quote the source metadata in the format
-        (Source: '{{source_meta}}', Page: {{page_meta}}).
+    You are a helpful AI assistant.
 
-        Use the following extracted document context to answer the question.
-        If snippets don't contain the answer, say you cannot find the information
-        in the documents and then answer using your general knowledge.
-        If the asked question is not relevant to the context, simply say that
-        the provided question is irrelevant.
+    You MUST answer the user's question using ONLY the information provided
+    in the document context below.
 
-        Context:
-        {context}
+    Rules:
+    - Do NOT use prior knowledge or general knowledge.
+    - Every factual statement MUST include a citation.
+    - Use the citation format exactly as shown:
+    <source='filename', page=number>
+    - If the answer is not present in the documents, say:
+    "I cannot find this information in the provided documents."
+    - If the question is unrelated to the documents, say:
+    "The provided question is irrelevant to the given documents."
+    - Convert any Markdown or HTML into plain text in your response.
 
-        Also, clean markdown and HTML codes to plain texts when providing your response.
+    Document Context:
+    {context}
     """
 
     QUESTION = """
-        Given the following conversation and a follow-up question, rephrase the follow-up question
-        to be a standalone search query. Do not answer the question, just rephrase it.
-        If the follow-up question is already a standalone question, return it as is.
+    Given the following conversation and a follow-up question,
+    rewrite the follow-up question so that it can be understood
+    independently without the chat history.
 
-        Chat history:
-        {chat_history}
+    Do NOT answer the question.
+    Do NOT add new information.
+    Return ONLY the rewritten question.
 
-        Follow Up Question: {question}
+    Chat History:
+    {chat_history}
 
-        Standalone Search Query:
+    Follow-up Question:
+    {question}
+
+    Standalone Question:
     """
 
     return {
-        "system": SYSTEM,
-        "question": QUESTION
+        "system": SYSTEM.strip(),
+        "question": QUESTION.strip(),
     }
 
 
 def format_docs(docs: List[Document]) -> str:
     formatted_snippets = []
-    
-    for i, doc in enumerate(docs):
-        source_meta = doc.metadata.get("source", "unknown file")
-        page_meta = doc.metadata.get("page", "unknown")
 
-        source_file = source_meta.split("/")[-1]
-        
+    for idx, doc in enumerate(docs, start=1):
+        metadata = doc.metadata or {}
+
+        source = metadata.get("source", "unknown")
+        page = metadata.get("page", "unknown")
+
+        source_file = source.split("/")[-1] if isinstance(source, str) else "unknown"
+
         formatted_snippets.append(
-            f"--- Snippet {i+1} ---\n"
-            f"Content: {doc.page_content}\n"
-            f"Citation: <source='{source_file}', page={page_meta}>\n"
+            f"--- Snippet {idx} ---\n"
+            f"{doc.page_content.strip()}\n"
+            f"<source='{source_file}', page={page}>"
         )
-    
+
     return "\n\n".join(formatted_snippets)
