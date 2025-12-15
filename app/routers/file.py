@@ -6,17 +6,26 @@ router = APIRouter()
 doc_service = DocumentService()
 vector_service = VectorService()
 
+ALLOWED_EXTENSIONS = {".pdf", ".txt", ".docx"}
+
 @router.post("/upload")
 async def upload(file: UploadFile = File(...)):
-    if not file.filename.lower().endswith(".pdf"):
-        raise HTTPException(status_code=400, detail="Only PDF uploads supported")
-    
-    saved_path = doc_service.save_file(file)
+    ext = file.filename.lower().split(".")[-1]
+    ext = f".{ext}"
+
+    if ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(
+            status_code=400,
+            detail="Only PDF, TXT, and DOCX files are supported",
+        )
+
+    saved_path = await doc_service.save_file(file)
     chunks = doc_service.load_and_split(saved_path)
+
     vector_service.add_documents(chunks)
-    
+
     return {
         "status": "ok",
-        "message": f"{file.filename} uploaded and indexed.",
-        "chunks": len(chunks)
+        "message": f"{file.filename} uploaded and indexed",
+        "chunks": len(chunks),
     }
