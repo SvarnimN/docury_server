@@ -2,16 +2,17 @@ import os
 from typing import List
 from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
+from langchain_aws import BedrockEmbeddings
 from langchain_core.documents import Document
-from app.config import Configs
-
+from app.config import Configs, AWSConfigs
 
 class VectorService:
     def __init__(self, store_dir: str = Configs.VECTOR_DIR):
         os.makedirs(store_dir, exist_ok=True)
 
-        self.embeddings = FastEmbedEmbeddings(
-            model="BAAI/bge-small-en-v1.5"
+        self.embeddings = BedrockEmbeddings(
+            region_name=AWSConfigs.REGION_NAME,
+            model_id=AWSConfigs.EMBEDDING_MODEL_ID
         )
 
         self.store_dir = store_dir

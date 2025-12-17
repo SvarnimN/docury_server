@@ -11,8 +11,9 @@ from langchain_community.retrievers import WikipediaRetriever
 from langchain_core.documents import Document
 from langchain_cohere import ChatCohere
 from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_aws import ChatBedrock
 from app.services.vector import VectorService
-from app.config import Configs
+from app.config import Configs, AWSConfigs
 from app.utils import get_prompt_templates, format_docs
 
 
@@ -22,11 +23,15 @@ class LLMResponse(BaseModel):
 
 
 class RAGService:
-    def __init__(self):
-        # self.llm = ChatCohere(temperature=0)
-        self.llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0)
-        self.vector_retriever = VectorService().get_retriever()
-        self.wiki_retriever = WikipediaRetriever(top_k_results=2, doc_content_chars_max=3000)
+    def __init__(self, store_dir: str = Configs.VECTOR_DIR):
+        self.llm = ChatBedrock(
+            region_name=AWSConfigs.REGION_NAME,
+            model_id=AWSConfigs.CHAT_MODEL_ID,
+            model_kwargs=AWSConfigs.MODEL_KWARGS,
+        )
+
+        self.vector_retriever = VectorService(store_dir=store_dir).get_retriever()
+        self.wiki_retriever = WikipediaRetriever(top_k_results=5, doc_content_chars_max=3000)
         self.prompt_template = get_prompt_templates()
 
         self.rag_prompt = ChatPromptTemplate.from_messages([
